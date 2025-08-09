@@ -21,8 +21,11 @@ export const uploadDocuments = async (
     onUploadProgress,
   });
 
-  console.log((await response).data);
   return response;
+};
+
+export const getJobStatus = async (jobId: string) => {
+  return api.get(`/api/documents/job/${jobId}`);
 };
 
 export default api;
