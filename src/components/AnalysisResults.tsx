@@ -36,7 +36,7 @@ export function AnalysisResults({ results, onClose }: AnalysisResultProps) {
     <div className="mt-8 space-y-6">
       <h2 className="text-2xl font-bold text-center">Resultado del analisis</h2>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-1">
         {results.map((result, index) => (
           <div key={index} className="p-4 border rounded-lg shadow-sm bg-white">
             <div className="flex items-center justify-between mb-2">
@@ -84,8 +84,59 @@ export function AnalysisResults({ results, onClose }: AnalysisResultProps) {
               <span className="text-sm">{result.analysis.confidence}%</span>
             </div>
 
-            {result.analysis.details && result.analysis.details.analysis && (
-              <p className="text-sm mt-2">{result.analysis.details.analysis}</p>
+            {result.analysis.summary && (
+              <p className="text-sm mt-2 text-gray-700">
+                {result.analysis.summary}
+              </p>
+            )}
+
+            {result.analysis.extractedData && (
+              <div className="mt-2 grid grid-cols-2 gap-1">
+                {result.analysis.extractedData.patente && (
+                  <div className="text-xs">
+                    <span className="font-medium">Patente: </span>
+                    <span className="text-blue-700">
+                      {result.analysis.extractedData.patente}
+                    </span>
+                  </div>
+                )}
+                {result.analysis.extractedData.dueno && (
+                  <div className="text-xs">
+                    <span className="font-medium">Dueño: </span>
+                    <span>{result.analysis.extractedData.dueno}</span>
+                  </div>
+                )}
+                {result.analysis.extractedData.fechaEmision && (
+                  <div className="text-xs">
+                    <span className="font-medium">F. Emisión: </span>
+                    <span>{result.analysis.extractedData.fechaEmision}</span>
+                  </div>
+                )}
+                {result.analysis.extractedData.marca && (
+                  <div className="text-xs">
+                    <span className="font-medium">Marca: </span>
+                    <span>
+                      {result.analysis.extractedData.marca}{' '}
+                      {result.analysis.extractedData.modelo}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {result.analysis.isAuthentic !== undefined && (
+              <div className="mt-2 flex items-center">
+                <span className="text-xs font-medium mr-1">Autenticidad:</span>
+                {result.analysis.isAuthentic ? (
+                  <span className="text-xs text-green-600">
+                    Documento auténtico
+                  </span>
+                ) : (
+                  <span className="text-xs text-red-600">
+                    Posible documento no auténtico
+                  </span>
+                )}
+              </div>
             )}
           </div>
         ))}
