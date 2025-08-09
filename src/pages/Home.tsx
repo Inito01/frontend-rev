@@ -1,12 +1,41 @@
-import { FileDropzone } from '@/components/file-dropzone';
+import { AnalysisResults } from '@/components/AnalysisResults';
+import { FileDropzone } from '@/components/FileDropzone';
+import { ProcessingProgress } from '@/components/ProcessingProgress';
 import { Button } from '@/components/ui/button';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { Upload, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function Home() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const { error, progress, success, uploadFiles, uploading } = useFileUpload();
+  const {
+    error,
+    progress,
+    processingProgress,
+    processing,
+    success,
+    uploadFiles,
+    uploading,
+    jobId,
+    results,
+    reset,
+  } = useFileUpload();
+
+  const [showResults, setShowResults] = useState(false);
+  const [filesCount, setFilesCount] = useState(0);
+  const [dropzoneKey, setDropzoneKey] = useState(0);
+
+  useEffect(() => {
+    if (success && results && results.length > 0) {
+      setShowResults(true);
+    }
+  }, [success, results]);
+
+  useEffect(() => {
+    if (selectedFiles.length > 0) {
+      setFilesCount(selectedFiles.length);
+    }
+  }, [selectedFiles]);
 
   const handleFilesAccepted = (files: File[]) => {
     setSelectedFiles((prev) => [...prev, ...files]);
@@ -33,12 +62,24 @@ function Home() {
   const handleUpload = async () => {
     if (selectedFiles.length === 0) return;
 
+    setShowResults(false);
     try {
-      await uploadFiles(selectedFiles);
+      const response = await uploadFiles(selectedFiles);
+      if (response && response.fileCount) {
+        setFilesCount(response.fileCount);
+      }
       setSelectedFiles([]);
+      setDropzoneKey((prevKey) => prevKey + 1);
     } catch (error) {
       console.log(`Error subiendo archivos: ${error}`);
     }
+  };
+
+  const closeResults = () => {
+    setShowResults(false);
+    setSelectedFiles([]);
+    reset();
+    setDropzoneKey((prevKey) => prevKey + 1);
   };
   return (
     <div className="min-h-screen p-4">
@@ -77,6 +118,7 @@ function Home() {
 
         <div className="bg-white rounded-2xl shadow-xl p-8 space-x-6">
           <FileDropzone
+            key={dropzoneKey}
             onFilesAccepted={handleFilesAccepted}
             onFilesCleared={handleFilesCleared}
             onFilesRemoved={handleFilesRemoved}
@@ -85,59 +127,54 @@ function Home() {
           />
 
           {selectedFiles.length > 0 && (
-            <div className="flex flex-col space-y-4 mx-auto">
-              <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-center space-x-2">
-                  <Upload className="h-5 w-5 text-blue-600" />
-                  <span className="font-medium text-blue-800">
-                    {selectedFiles.length} archivo(s) seleccionado(s)
-                  </span>
-                </div>
-                <Button
-                  onClick={handleUpload}
-                  disabled={uploading}
-                  className="bg-blue-600 hover:bg-blue-700 hover:cursor-pointer"
-                >
-                  {uploading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Subiendo...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="mr-2 h-4 w-4" />
-                      Subir archivos
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {uploading && (
-                <div className="space-y-2">
-                  {Object.entries(progress).map(([fileName, percent]) => (
-                    <div key={fileName} className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span className="truncate">{fileName}</span>
-                        <span>{percent}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${percent}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+            <div className="flex justify-center">
+              <Button
+                onClick={handleUpload}
+                disabled={uploading || processing}
+                className="w-full max-w-xs bg-blue-600 hover:bg-blue-700 hover:cursor-pointer"
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Subiendo...
+                  </>
+                ) : processing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Analizar Documentos
+                  </>
+                )}
+              </Button>
             </div>
           )}
 
-          {success && (
-            <div className="flex items-center space-x-2 p-4 bg-green-50 text-green-800 rounded-lg border border-green-200 mx-auto">
-              <CheckCircle className="h-5 w-5" />
-              <span className="font-medium">Archivos subidos exitosamente</span>
+          {uploading && (
+            <div className="mb-4">
+              <div className="flex justify-between text-sm mb-1">
+                <span>Subiendo archivos</span>
+                <span>{Object.values(progress)[0] || 0}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div
+                  className="bg-blue-500 h-2.5 rounded-full"
+                  style={{ width: `${Object.values(progress)[0] || 0}%` }}
+                ></div>
+              </div>
             </div>
+          )}
+
+          {processing && (
+            <ProcessingProgress
+              jobId={jobId}
+              processingProgress={processingProgress}
+              processedFilesCount={results ? results.length : 0}
+              filesCount={filesCount}
+            />
           )}
 
           {error && (
@@ -145,6 +182,19 @@ function Home() {
               <AlertCircle className="h-5 w-5" />
               <span className="font-medium">{error}</span>
             </div>
+          )}
+
+          {success && !showResults && (
+            <div className="flex items-center space-x-2 p-4 bg-green-50 text-green-800 rounded-lg border border-green-200 mx-auto">
+              <CheckCircle className="h-5 w-5" />
+              <span className="font-medium">
+                Archivos procesados exitosamente
+              </span>
+            </div>
+          )}
+
+          {showResults && results && results.length > 0 && (
+            <AnalysisResults results={results} onClose={closeResults} />
           )}
         </div>
       </div>
