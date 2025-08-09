@@ -1,18 +1,33 @@
 import { uploadDocuments } from '@/services/api';
 import type { UploadProgress, UseFileUploadReturn } from '@/types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { usePolling } from './usePolling';
 
 export function useFileUpload(): UseFileUploadReturn {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState<UploadProgress>({});
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [jobId, setJobId] = useState(null);
+
+  const {
+    jobStatus,
+    processingProgress,
+    results,
+    error: pollingError,
+    resetStates: resetPolling,
+  } = usePolling(jobId);
+
+  useEffect(() => {
+    if (pollingError) {
+      setError(pollingError);
+    }
+  }, [pollingError]);
 
   const uploadFiles = async (files: File[]) => {
     setUploading(true);
     setError(null);
-    setSuccess(false);
     setProgress({});
+    setJobId(null);
 
     try {
       const response = await uploadDocuments(files, (progressEvent) => {
@@ -29,7 +44,9 @@ export function useFileUpload(): UseFileUploadReturn {
         }
       });
 
-      setSuccess(true);
+      if (response.data?.jobId) {
+        setJobId(response.data.jobId);
+      }
       return response.data;
     } catch (error: any) {
       setError(error.response?.data?.message || 'Error al subir archivos');
@@ -39,11 +56,25 @@ export function useFileUpload(): UseFileUploadReturn {
     }
   };
 
+  const reset = () => {
+    setUploading(false);
+    setProgress({});
+    setError(null);
+    setJobId(null);
+    resetPolling();
+  };
+
   return {
     uploadFiles,
     uploading,
     progress,
-    success,
-    error,
+    uploadProgress: progress,
+    processingProgress,
+    processing: jobStatus === 'processing',
+    success: jobStatus === 'completed',
+    error: error || pollingError,
+    jobId,
+    results,
+    reset,
   };
 }
