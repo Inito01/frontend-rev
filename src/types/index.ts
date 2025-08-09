@@ -23,6 +23,24 @@ export interface UseFileUploadReturn {
   uploadFiles: (files: File[]) => Promise<any>;
   uploading: boolean;
   progress: UploadProgress;
-  error: string | null;
+  uploadProgress: UploadProgress;
+  processingProgress: number;
+  processing: boolean;
   success: boolean;
+  error: string | null;
+  jobId: string | null;
+  results: any[];
+  reset: () => void;
+}
+
+export interface AnalysisResultProps {
+  results: any[];
+  onClose: () => void;
+}
+
+export interface ProcessingProgressProps {
+  jobId: string | null;
+  filesCount: number;
+  processedFilesCount: number;
+  processingProgress: number;
 }
