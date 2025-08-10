@@ -94,7 +94,7 @@ export function FileDropzone({
       <div
         {...getRootProps()}
         className={cn(
-          'relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ease-in-out',
+          'relative border-2 border-dashed rounded-xl p-4 sm:p-6 md:p-8 text-center cursor-pointer transition-all duration-200 ease-in-out',
           'hover:border-primary/50 hover:bg-primary/10',
           isDragActive && 'border-primary bg-primary/10 scale-105',
           isDragAccept && 'border-green-500 bg-green-50',
@@ -104,28 +104,28 @@ export function FileDropzone({
       >
         <input {...getInputProps()} />
 
-        <div className="flex flex-col items-center justify-center space-y-4">
+        <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4">
           <div
             className={cn(
-              'p-4 rounded-full transition-colors duration-200',
+              'p-3 sm:p-4 rounded-full transition-colors duration-200',
               isDragActive ? 'bg-primary/20' : 'bg-transparent'
             )}
           >
             <Upload
               className={cn(
-                'h-10 transition-colors duration-200',
+                'h-8 w-8 sm:h-10 sm:w-10 transition-colors duration-200',
                 isDragActive ? 'text-primary' : 'text-gray-500'
               )}
             />
           </div>
 
-          <div className="space-y-2">
-            <p className="text-lg font-medium text-gray-700">
+          <div className="space-y-1 sm:space-y-2">
+            <p className="text-base sm:text-lg font-medium text-gray-700">
               {isDragActive
                 ? 'Suelta los archivos aqui...'
                 : 'Arrastra archivos o haz clic para seleccionar'}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-xs sm:text-sm text-gray-500">
               Solo archivos PDF, JPG Y JPEG (máximo 10MB cada uno)
             </p>
           </div>
@@ -133,7 +133,7 @@ export function FileDropzone({
           <Button
             variant={'outline'}
             type="button"
-            className="mt-4 hover:cursor-pointer"
+            className="mt-2 sm:mt-4 text-sm sm:text-base hover:cursor-pointer"
           >
             Seleccionar archivos
           </Button>
@@ -169,33 +169,33 @@ export function FileDropzone({
 
       {/* aceptados */}
       {uploadedFiles.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-medium text-gray-900 flex items-center space-x-2">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-medium text-gray-900 flex items-center space-x-2 text-sm sm:text-base">
               <span>Archivos listos ({uploadedFiles.length})</span>
             </h3>
             <Button
               variant={'outline'}
               size={'sm'}
               onClick={clearAllFiles}
-              className="text-red-600 hover:text-red-700 hover:cursor-pointer"
+              className="text-red-600 hover:text-red-700 hover:cursor-pointer text-xs sm:text-sm"
             >
               Limpiar todo
             </Button>
           </div>
 
-          <div className="grid gap-3">
+          <div className="grid gap-2 sm:gap-3">
             {uploadedFiles.map((file, index) => (
               <div
                 key={index}
-                className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg border"
+                className="flex items-center space-x-2 sm:space-x-4 p-2 sm:p-4 bg-gray-50 rounded-lg border"
               >
-                <div>
+                <div className="flex-shrink-0">
                   {file.preview ? (
                     <img
                       src={file.preview}
                       alt={file.name}
-                      className="h-12 w-12 object-cover rounded-lg border"
+                      className="h-10 w-10 sm:h-12 sm:w-12 object-cover rounded-lg border"
                     />
                   ) : (
                     getFileIcon(file)
@@ -203,10 +203,10 @@ export function FileDropzone({
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
                     {file.name}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs sm:text-sm text-gray-500">
                     {formatFileSize(file.size)} ° {file.type}
                   </p>
                 </div>
@@ -215,9 +215,9 @@ export function FileDropzone({
                   variant={'ghost'}
                   size={'sm'}
                   onClick={() => removeFile(file)}
-                  className="text-gray-400 hover:text-red-500 hover:cursor-pointer"
+                  className="text-gray-400 hover:text-red-500 hover:cursor-pointer p-1 sm:p-2"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
             ))}
