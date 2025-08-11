@@ -1,21 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
 import { Container } from '../components/ui/container';
-
-interface Document {
-  id: string;
-  originalName: string;
-  status: string;
-  confidence: number;
-  createdAt: string;
-}
-
-interface PaginationData {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+import type { Document, PaginationData } from '@/types';
 
 export function History() {
   const [documents, setDocuments] = useState<Document[]>([]);
