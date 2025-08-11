@@ -44,3 +44,56 @@ export interface ProcessingProgressProps {
   processedFilesCount: number;
   processingProgress: number;
 }
+
+// Auth
+export interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface RegisterFormProps {
+  onSuccess?: () => void;
+  onLoginClick: () => void;
+}
+
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
+export interface LoginFormProps {
+  onSuccess?: () => void;
+  onRegisterClick: () => void;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+    };
+    token: string;
+  };
+}
+
+// History
+export interface Document {
+  id: string;
+  originalName: string;
+  status: string;
+  confidence: number;
+  createdAt: string;
+}
+
+export interface PaginationData {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
